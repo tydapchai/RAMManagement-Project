@@ -3,7 +3,6 @@ package model;
 import filehandle.FileHandler;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import tool.Tools;
@@ -13,8 +12,11 @@ public class RAMManagementSystem {
 
     private HashMap<String, RAM> ramItems;
     private FileHandler fileHandler;
+    private String k = String.format("%-15s %-15s %-15s %-15s %-12s %-10s %-10s",
+            "RAM Code", "Type", "Bus", "Brand", "Quantity", "Date", "Active");
 
     public RAMManagementSystem(String fileName) {
+
         this.fileHandler = new FileHandler(fileName);
         this.ramItems = new HashMap<>();
         List<RAM> loadedRAM = fileHandler.loadFromFile();
@@ -57,24 +59,21 @@ public class RAMManagementSystem {
     public List<RAM> toList() {
         List<RAM> RAMList = new ArrayList<>(ramItems.values());
 
-        Collections.sort(RAMList, new Comparator<RAM>() {
-            @Override
-            public int compare(RAM r1, RAM r2) {
-                int typeCompare = r1.getType().compareTo(r2.getType());
+        Collections.sort(RAMList, (RAM r1, RAM r2) -> {
+            int typeCompare = r1.getType().compareTo(r2.getType());
 
-                if (typeCompare == 0) {
-                    int bus1 = Integer.parseInt(r1.getBus().replaceAll("[^0-9]", ""));
-                    int bus2 = Integer.parseInt(r2.getBus().replaceAll("[^0-9]", ""));
+            if (typeCompare == 0) {
+                int bus1 = Integer.parseInt(r1.getBus().replaceAll("[^0-9]", ""));
+                int bus2 = Integer.parseInt(r2.getBus().replaceAll("[^0-9]", ""));
 
-                    int busCompare = Integer.compare(bus2, bus1);
+                int busCompare = Integer.compare(bus2, bus1);
 
-                    if (busCompare == 0) {
-                        return r1.getBrand().compareTo(r2.getBrand());
-                    }
-                    return busCompare;
+                if (busCompare == 0) {
+                    return r1.getBrand().compareTo(r2.getBrand());
                 }
-                return typeCompare;
+                return busCompare;
             }
+            return typeCompare;
         });
 
         return RAMList;
@@ -140,27 +139,21 @@ public class RAMManagementSystem {
         System.out.println("RAM updated successfully.");
     }
 
-    
     /**
      * delete item base on status active
      */
     public void deleteItem() {
         String check = Tools.inputString("Enter RAM code to delete: ");
-        boolean found = false;
+        RAM ram = ramItems.get(check);
 
-        for (RAM ram : this.toList()) {
-            if (ram.getCode().equals(check)) {
-                found = true;
-                if (Tools.continueFunction("Do you wish to delete this ? y/n: ")) {
-                    ram.setFlag(false);
-                    System.out.println("RAM item deleted successfully.");
-                }
-                break;
-            }
+        if (ram == null) {
+            System.out.println("No such RAM found with the given code.");
+            return;
         }
 
-        if (!found) {
-            System.out.println("No such RAM found with the given code.");
+        if (Tools.continueFunction("Do you wish to delete this ? y/n: ")) {
+            ram.setFlag(false);
+            System.out.println("RAM item deleted successfully.");
         }
     }
 
@@ -175,18 +168,15 @@ public class RAMManagementSystem {
             return;
         }
 
-        System.out.println(String.format("%-15s %-15s %-15s %-15s %-12s %-10s %-10s",
-                "RAM Code", "Type", "Bus", "Brand", "Quantity", "Date", "Active"));
+        System.out.println(k);
 
-        for (RAM item : sortedRAMList) {
-            if (item.getFlag()) {
-                System.out.println(item);
-            }
-        }
+        sortedRAMList.stream().filter((item) -> (item.getFlag())).forEach((item) -> {
+            System.out.println(item);
+        });
     }
 
     /**
-     * search ram by sub menu
+     * search ram with sub menu
      */
     public void search() {
         int choice;
@@ -218,8 +208,7 @@ public class RAMManagementSystem {
                     boolean foundBus = false;
                     for (RAM ram : this.toList()) {
                         if (ram.getBus().equalsIgnoreCase(tempBus)) {
-                            System.out.println(String.format("%-15s %-15s %-15s %-15s %-12s %-10s %-10s",
-                                    "RAM Code", "Type", "Bus", "Brand", "Quantity", "Date", "Active"));
+                            System.out.println(k);
                             System.out.println(ram);
                             foundBus = true;
                         }
@@ -233,8 +222,7 @@ public class RAMManagementSystem {
                     boolean foundBrand = false;
                     for (RAM ram : this.toList()) {
                         if (ram.getBrand().equalsIgnoreCase(tempBrand)) {
-                            System.out.println(String.format("%-15s %-15s %-15s %-15s %-12s %-10s %-10s",
-                                    "RAM Code", "Type", "Bus", "Brand", "Quantity", "Date", "Active"));
+                            System.out.println(k);
                             System.out.println(ram);
                             foundBrand = true;
                         }
@@ -251,6 +239,28 @@ public class RAMManagementSystem {
                     break;
             }
         } while (choice != 0);
+    }
+
+    public void showByBusQuantity() {
+
+        List<RAM> sortedRAMList = this.toList();
+
+        if (sortedRAMList.isEmpty()) {
+            System.out.println("No RAM items available.");
+            return;
+        }
+
+        System.out.println(k);
+        String check = Tools.inputString("Enter bus to display:");
+        int under = Tools.inputInt("Enter the lower quantity:");
+        int upper = Tools.inputInt("Enter the upper quantity:");
+
+        for (RAM ram : this.toList()) {
+            if (ram.getBus().startsWith(check) && ram.getQuantity() >= under && ram.getQuantity() <= upper) {
+                System.out.println(ram);
+            }
+        }
+
     }
 
 }

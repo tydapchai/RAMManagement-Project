@@ -73,19 +73,21 @@ private static final Scanner sc = new Scanner(System.in);
      * Prompt the user with a message and check if input is y or n It continue
      * to prompt the user until the user input y or n
      *
-     * @param s s is the user choice
-     * @return s
+     * @param prompt show a message to user for input
+     * @return s user choice
      */
     public static boolean continueFunction(String prompt) {
         String input;
         do {
             input = Tools.inputString(prompt).trim().toLowerCase();
-            if (input.equals("y")) {
-                return true;
-            } else if (input.equals("n")) {
-                return false;
-            } else {
-                System.out.println("Invalid input. Please enter 'y' or 'n'.");
+            switch (input) {
+                case "y":
+                    return true;
+                case "n":
+                    return false;
+                default:
+                    System.out.println("Invalid input. Please enter 'y' or 'n'.");
+                    break;
             }
         } while (!input.equals("y") && !input.equals("n"));
         return false; 

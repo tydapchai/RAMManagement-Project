@@ -16,7 +16,7 @@ public class Inputter {
             if (type.matches(".*\\d")) {
                 valid = true;
             } else {
-                System.out.println("Invalid type. Must contain at least one number.");
+                System.out.println("Invalid type. Must match format DDRX.");
             }
         } while (!valid);
         return type;

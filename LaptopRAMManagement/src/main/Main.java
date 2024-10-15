@@ -7,8 +7,7 @@ public class Main {
 
     public static void main(String[] args) {
         RAMManagementSystem system = new RAMManagementSystem("src/data/RAMModules.dat");
-
-        int choice = 0;
+        int choice;
         do {
             choice = Tools.inputInt(
                     "-------------------RAM Management System------------------------\n"
@@ -36,9 +35,10 @@ public class Main {
                     break;
                 case 5:
                     system.showAllItems();
+                    system.showByBusQuantity();
                     break;
                 case 6:
-                   
+
                     if (Tools.continueFunction("Do you want to save changes before exiting? (y/n): ")) {
                         system.saveData();
                         System.out.println("Data saved successfully. Exiting program...");
